@@ -15,5 +15,6 @@ Then move it to your computer and run the code.
 ### **In IOS:**
 
 # **Important tweaks:**
-## **Main.py file:**
+### **Main.py file:**
+
 # **Features:**
