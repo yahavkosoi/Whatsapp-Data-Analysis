@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import pandas as pd
 from bidi.algorithm import get_display
-
+import os
 
 class Analyse:
     def __init__(self, filename):
@@ -125,6 +125,31 @@ class Analyse:
         print(sorted_list)
         return sorted_list
 
+    def get_message_times(self, name=None):
+        names = self.data.keys()
+        if name:
+            names = [name]
+        times = []
+        for name in names:
+            for message in self.data[name]:
+                times.append(message[1])
+        return times
+
+    def get_message_count_in_interval(self, start, end, name=None):
+        count = 0
+        times = self.get_message_times(name)
+        for time in times:
+            if self.is_in_time_interval(time, start, end):
+                count += 1
+        return count
+
+    def get_leaderboards_in_interval(self, start, end):
+        leaderboards = {}
+        for name in self.data:
+            leaderboards[name] = self.get_message_count_in_interval(start, end, name)
+        sorted_leaderboards = self.sort_dict(leaderboards)
+        return sorted_leaderboards
+
     @staticmethod
     def sort_dict(dict, unpack=False):
         l = list(sorted(dict.items(), key=lambda item: item[1], reverse=True))
@@ -141,7 +166,7 @@ class Analyse:
         return l_unpacked
 
     @staticmethod
-    def create_table(headers, data, filename, show=False):
+    def create_table(headers, data, filename, show=False, title=None):
         """
         headers = ["Name", "Message Count"]
         data = [(name1, count1), (name2, count2]
@@ -154,6 +179,9 @@ class Analyse:
         rcParams['font.family'] = 'Arial'
         fig, ax = plt.subplots(figsize=(4, 2))
         ax.axis('off')
+        if not title:
+            title = filename.removesuffix("." + filename.split('.')[-1])
+        ax.set_title(title, fontsize=12, fontweight="bold", pad=50)
         table = ax.table(cellText=df.values,
                          colLabels=df.columns,
                          loc='center',
@@ -165,4 +193,31 @@ class Analyse:
         table.auto_set_column_width(col=list(range(len(df.columns))))
         plt.savefig(filename, dpi=300, bbox_inches='tight')
         if show:
-            plt.show()
+            os.startfile(filename)
+
+    @staticmethod
+    def average_time(list_of_times):
+        times = 0
+        for time in list_of_times:
+            time = int(time.split(":")[0])*60 + int(time.split(":")[1])
+            times += time
+        avg = times/len(list_of_times)
+        hour, minute = divmod(avg, 60)
+        return f"{int(hour):02}:{int(minute):02}"
+
+    @staticmethod
+    def frequent_time(data):
+        times = set(data)
+        time_frequency = {}
+        for time in times:
+            time_frequency[time] = data.count(time)
+        return Analyse.sort_dict(time_frequency)
+
+    @staticmethod
+    def is_in_time_interval(time, start, end):
+        time = int(time.split(":")[0])*60 + int(time.split(":")[1])
+        start = int(start.split(":")[0])*60 + int(start.split(":")[1])
+        end = int(end.split(":")[0])*60 + int(end.split(":")[1])
+        if start > end:
+            return start <= time or time <= end
+        return start <= time <= end
