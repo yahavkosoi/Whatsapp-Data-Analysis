@@ -4,6 +4,8 @@ from matplotlib import rcParams
 import pandas as pd
 from bidi.algorithm import get_display
 import os
+from datetime import date, timedelta, datetime
+
 
 class Analyse:
     def __init__(self, filename):
@@ -150,6 +152,42 @@ class Analyse:
         sorted_leaderboards = self.sort_dict(leaderboards)
         return sorted_leaderboards
 
+    def get_message_count_in_date(self, date, name=None):
+        names = self.data.keys()
+        if name:
+            names = [name]
+        count = 0
+        for name in names:
+            for date_of_message, _, _ in self.data[name]:
+                if date_of_message == date:
+                    count += 1
+        return count
+
+    def get_first_and_last_date(self):
+        dates = []
+        for name in self.data:
+            for date_str, _, _ in self.data[name]:
+                date_obj = datetime.strptime(date_str, '%m/%d/%y')
+                dates.append(date_obj)
+        first_date = min(dates)
+        last_date = max(dates)
+        return first_date, last_date
+
+    def get_message_count_per_date(self, name=None, start_date=None, end_date=None):
+        if not start_date or not end_date:
+            start_date, end_date = self.get_first_and_last_date()
+        names = self.data.keys()
+        if name:
+            names = [name]
+        counts = {}
+        for name in names:
+            for date in self.daterange(start_date, end_date):
+                date_ = self.format_date(date)
+                if date_ not in counts.keys():
+                    counts[date_] = 0
+                counts[date_] += self.get_message_count_in_date(date_, name)
+        return counts
+
     @staticmethod
     def sort_dict(dict, unpack=False):
         l = list(sorted(dict.items(), key=lambda item: item[1], reverse=True))
@@ -199,9 +237,9 @@ class Analyse:
     def average_time(list_of_times):
         times = 0
         for time in list_of_times:
-            time = int(time.split(":")[0])*60 + int(time.split(":")[1])
+            time = int(time.split(":")[0]) * 60 + int(time.split(":")[1])
             times += time
-        avg = times/len(list_of_times)
+        avg = times / len(list_of_times)
         hour, minute = divmod(avg, 60)
         return f"{int(hour):02}:{int(minute):02}"
 
@@ -215,9 +253,46 @@ class Analyse:
 
     @staticmethod
     def is_in_time_interval(time, start, end):
-        time = int(time.split(":")[0])*60 + int(time.split(":")[1])
-        start = int(start.split(":")[0])*60 + int(start.split(":")[1])
-        end = int(end.split(":")[0])*60 + int(end.split(":")[1])
+        time = int(time.split(":")[0]) * 60 + int(time.split(":")[1])
+        start = int(start.split(":")[0]) * 60 + int(start.split(":")[1])
+        end = int(end.split(":")[0]) * 60 + int(end.split(":")[1])
         if start > end:
             return start <= time or time <= end
         return start <= time <= end
+
+    @staticmethod
+    def daterange(start_date: date, end_date: date):
+        days = int((end_date - start_date).days)
+        for n in range(days):
+            yield start_date + timedelta(n)
+
+    @staticmethod
+    def format_date(datetime_obj):
+        formatted_date = datetime_obj.strftime('%m/%d/%y')
+        month, day, year = formatted_date.split('/')
+        return f"{int(month)}/{int(day)}/{year}"
+
+    @staticmethod
+    def create_date_graph(data, title="Date vs Count", xlabel="Date", ylabel="Count", filename="graph.png", show=False):
+        dates = list(data.keys())
+        values = list(data.values())
+
+        # Create the plot
+        plt.figure(figsize=(max(10, int(len(dates) * 0.5)), 6))
+        plt.plot(dates, values, marker='o', linestyle='-', color='b')
+        plt.title(title, fontsize=14, fontweight="bold")
+        plt.xlabel(xlabel, fontsize=12)
+        plt.ylabel(ylabel, fontsize=12)
+        plt.grid(True, linestyle='--', alpha=0.7)
+
+        plt.xticks(dates, dates, rotation=25, ha='right', fontsize=12)
+        # Format the x-axis to show dates nicely
+        plt.gcf().autofmt_xdate()
+        # plt.tight_layout()
+
+        # Save the graph
+        plt.savefig(filename, dpi=200)
+
+        # Optionally show the graph
+        if show:
+            plt.show()
