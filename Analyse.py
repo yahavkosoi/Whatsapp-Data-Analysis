@@ -192,8 +192,8 @@ class Analyse:
         return counts
 
     @staticmethod
-    def sort_dict(dict, unpack=False):
-        l = list(sorted(dict.items(), key=lambda item: item[1], reverse=True))
+    def sort_dict(dict_, unpack=False):
+        l = list(sorted(dict_.items(), key=lambda item: item[1], reverse=True))
         if not unpack:
             return l
         if unpack:
@@ -281,7 +281,7 @@ class Analyse:
         values = list(data.values())
 
         # Create the plot
-        plt.figure(figsize=(max(10, int(len(dates) * 0.5    )), 6))
+        plt.figure(figsize=(max(10, int(len(dates) * 0.5)), 6))
         plt.plot(dates, values, marker='o', linestyle='-', color='b')
         plt.title(title, fontsize=14, fontweight="bold")
         plt.xlabel(xlabel, fontsize=12)
