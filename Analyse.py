@@ -176,6 +176,9 @@ class Analyse:
     def get_message_count_per_date(self, name=None, start_date=None, end_date=None):
         if not start_date or not end_date:
             start_date, end_date = self.get_first_and_last_date()
+        else:
+            start_date = datetime.strptime(start_date, '%m/%d/%y')
+            end_date = datetime.strptime(end_date, '%m/%d/%y')
         names = self.data.keys()
         if name:
             names = [name]
@@ -278,7 +281,7 @@ class Analyse:
         values = list(data.values())
 
         # Create the plot
-        plt.figure(figsize=(max(10, int(len(dates) * 0.5)), 6))
+        plt.figure(figsize=(max(10, int(len(dates) * 0.5    )), 6))
         plt.plot(dates, values, marker='o', linestyle='-', color='b')
         plt.title(title, fontsize=14, fontweight="bold")
         plt.xlabel(xlabel, fontsize=12)
