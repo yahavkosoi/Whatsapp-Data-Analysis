@@ -124,7 +124,6 @@ class Analyse:
         if do_sum:
             for i in range(len(sorted_list)):
                 sorted_list[i].append(sum(sorted_list[i][1:]))
-        print(sorted_list)
         return sorted_list
 
     def get_message_times(self, name=None):
@@ -220,8 +219,6 @@ class Analyse:
         rcParams['font.family'] = 'Arial'
         fig, ax = plt.subplots(figsize=(4, 2))
         ax.axis('off')
-        if not title:
-            title = filename.removesuffix("." + filename.split('.')[-1])
         ax.set_title(title, fontsize=12, fontweight="bold", pad=50)
         table = ax.table(cellText=df.values,
                          colLabels=df.columns,
@@ -281,20 +278,20 @@ class Analyse:
         values = list(data.values())
 
         # Create the plot
-        plt.figure(figsize=(max(10, int(len(dates) * 0.5)), 6))
+        plt.figure(figsize=(max(10, int(len(dates) * 0.7)), 6))
         plt.plot(dates, values, marker='o', linestyle='-', color='b')
         plt.title(title, fontsize=14, fontweight="bold")
         plt.xlabel(xlabel, fontsize=12)
         plt.ylabel(ylabel, fontsize=12)
         plt.grid(True, linestyle='--', alpha=0.7)
 
-        plt.xticks(dates, dates, rotation=25, ha='right', fontsize=12)
+        plt.xticks(dates, dates, rotation=45, ha='right', fontsize=14)
         # Format the x-axis to show dates nicely
         plt.gcf().autofmt_xdate()
         # plt.tight_layout()
 
         # Save the graph
-        plt.savefig(filename, dpi=200)
+        plt.savefig(filename, dpi=100)
 
         # Optionally show the graph
         if show:
