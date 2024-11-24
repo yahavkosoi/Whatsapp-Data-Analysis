@@ -286,13 +286,18 @@ class Analyse:
         plt.grid(True, linestyle='--', alpha=0.7)
 
         plt.xticks(dates, dates, rotation=45, ha='right', fontsize=14)
-        # Format the x-axis to show dates nicely
         plt.gcf().autofmt_xdate()
-        # plt.tight_layout()
 
-        # Save the graph
         plt.savefig(filename, dpi=100)
 
-        # Optionally show the graph
         if show:
             plt.show()
+
+    @staticmethod
+    def get_n_first_from_dict(dict_, n, ignore_list):
+        n = min(n, len(dict_))
+        for ignore in ignore_list:
+            if ignore in dict_:
+                del dict_[ignore]
+        dict_ = Analyse.sort_dict(dict_)
+        return dict_[:n]
